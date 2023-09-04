@@ -30,7 +30,10 @@ const NewTask = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      await axios.post("http://localhost:5000/dashboard", taskData);
+      await axios.post(
+        "https://task-manager-server-amber-six.vercel.app/dashboard",
+        taskData
+      );
       Swal.fire("Task Created Successfully");
     } catch (err) {
       console.error(err);

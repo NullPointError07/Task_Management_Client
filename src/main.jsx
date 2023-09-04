@@ -28,7 +28,9 @@ const router = createBrowserRouter([
         path: "dashboard/:id",
         element: <TaskDetails></TaskDetails>,
         loader: ({ params }) =>
-          fetch(`http://localhost:5000/dashboard/${params.id}`),
+          fetch(
+            `https://task-manager-server-amber-six.vercel.app/dashboard/${params.id}`
+          ),
       },
       {
         path: "login",

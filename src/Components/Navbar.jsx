@@ -21,6 +21,9 @@ const Navbar = () => {
           <Link to="/">Task Management</Link>
         </div>
         <div className="flex space-x-3">
+          <button className="btn btn-primary">
+            <NavLink to="/dashboard">Dashboard</NavLink>
+          </button>
           {!cookies.access_token ? (
             <>
               <button className="btn btn-primary">
@@ -35,9 +38,6 @@ const Navbar = () => {
               <h1 className="font-bold text-xl text-blue-500">
                 {username + "'s"}
               </h1>
-              <button className="btn btn-primary">
-                <NavLink to="/dashboard">Dashboard</NavLink>
-              </button>
               <button onClick={handleLogOut} className="btn btn-error">
                 LogOut
               </button>

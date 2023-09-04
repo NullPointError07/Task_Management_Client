@@ -14,7 +14,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/dashboard");
+        const response = await axios.get(
+          "https://task-manager-server-amber-six.vercel.app/dashboard"
+        );
         setTasks(response.data);
       } catch (err) {
         console.error(err);
@@ -45,17 +47,20 @@ const Dashboard = () => {
     }
 
     try {
-      await axios.put("http://localhost:5000/dashboard/update", {
-        id: selectedTaskId,
-        newStatus: selectedStatus,
-      });
+      await axios.put(
+        "https://task-manager-server-amber-six.vercel.app/dashboard/update",
+        {
+          id: selectedTaskId,
+          newStatus: selectedStatus,
+        }
+      );
 
       // Close the modal after successful update
       closeModal();
 
       // Fetch updated task list and set it in the state
       const updatedResponse = await axios.get(
-        "http://localhost:5000/dashboard"
+        "https://task-manager-server-amber-six.vercel.app/dashboard"
       );
       setTasks(updatedResponse.data);
 
@@ -79,12 +84,14 @@ const Dashboard = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5000/dashboard/delete/${id}`);
+          await axios.delete(
+            `https://task-manager-server-amber-six.vercel.app/dashboard/delete/${id}`
+          );
           Swal.fire("Deleted!", "Your file has been deleted.", "success");
 
           // Fetch updated task list and set it in the state
           const updatedResponse = await axios.get(
-            "http://localhost:5000/dashboard"
+            "https://task-manager-server-amber-six.vercel.app/dashboard"
           );
           setTasks(updatedResponse.data);
         } catch (error) {
