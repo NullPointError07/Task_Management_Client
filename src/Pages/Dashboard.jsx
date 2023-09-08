@@ -9,13 +9,26 @@ const Dashboard = () => {
   const [taskField, setTaskField] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedPriority, setSelectedPriority] = useState("");
+  const [selectedDueDate, setSelectedDueDate] = useState("");
+  const [sortByDueDate, setSortByDueDate] = useState(null);
+  const [sortByPriority, setSortByPriority] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://task-manager-server-amber-six.vercel.app/dashboard"
+          "https://task-manager-server-amber-six.vercel.app/dashboard",
+          {
+            params: {
+              sortByDueDate,
+              sortByPriority,
+              selectedStatus,
+              selectedPriority,
+              selectedDueDate,
+            },
+          }
         );
         setTasks(response.data);
       } catch (err) {
@@ -24,7 +37,13 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [
+    sortByDueDate,
+    sortByPriority,
+    selectedStatus,
+    selectedPriority,
+    selectedDueDate,
+  ]);
 
   const formatDate = (date) => {
     const newDate = date.split("-");
@@ -55,10 +74,10 @@ const Dashboard = () => {
         }
       );
 
-      // Close the modal after successful update
+      // Close the modal after a successful update
       closeModal();
 
-      // Fetch updated task list and set it in the state
+      // Fetch the updated task list and set it in the state
       const updatedResponse = await axios.get(
         "https://task-manager-server-amber-six.vercel.app/dashboard"
       );
@@ -89,7 +108,7 @@ const Dashboard = () => {
           );
           Swal.fire("Deleted!", "Your file has been deleted.", "success");
 
-          // Fetch updated task list and set it in the state
+          // Fetch the updated task list and set it in the state
           const updatedResponse = await axios.get(
             "https://task-manager-server-amber-six.vercel.app/dashboard"
           );
@@ -105,11 +124,122 @@ const Dashboard = () => {
     setTaskField(!taskField);
   };
 
+  // Function to handle sorting
+  const handleSort = (sortBy, sortOrder) => {
+    if (sortBy === "due_date") {
+      setSortByDueDate(sortOrder);
+      setSortByPriority(null); // Reset the priority sorting
+    } else if (sortBy === "priority_level") {
+      setSortByPriority(sortOrder);
+      setSortByDueDate(null); // Reset the due date sorting
+    }
+  };
+
+  const priorityOrder = {
+    low: 0,
+    medium: 1,
+    high: 2,
+  };
+
+  const comparePriority = (a, b) => {
+    const priorityA = priorityOrder[a.priority_level.toLowerCase()];
+    const priorityB = priorityOrder[b.priority_level.toLowerCase()];
+    return sortByPriority === "asc"
+      ? priorityA - priorityB
+      : priorityB - priorityA;
+  };
+
+  const sortedTasks = [...tasks]; // Create a copy of the tasks array to avoid mutating the original array
+
+  if (sortByDueDate) {
+    sortedTasks.sort((a, b) => {
+      const dateA = new Date(a.due_date);
+      const dateB = new Date(b.due_date);
+      return sortByDueDate === "asc" ? dateA - dateB : dateB - dateA;
+    });
+  }
+
+  if (sortByPriority) {
+    sortedTasks.sort(comparePriority);
+  }
+
+  const filteredTasks = sortedTasks.filter((task) => {
+    return (
+      (selectedStatus === "" || task.status === selectedStatus) &&
+      (selectedPriority === "" || task.priority_level === selectedPriority) &&
+      (selectedDueDate === "" || task.due_date.includes(selectedDueDate))
+    );
+  });
+
   return (
     <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:space-x-4 mt-12">
       <div className="md:w-2/3">
+        {/* Filter By Status Controls */}
+        <div className="mb-4 flex space-x-2">
+          <button
+            onClick={() => setSelectedStatus("")}
+            className={`btn ${
+              selectedStatus === "" ? "btn-primary" : "btn-outline"
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setSelectedStatus("Not Started")}
+            className={`btn ${
+              selectedStatus === "Not Started" ? "btn-primary" : "btn-outline"
+            }`}
+          >
+            Not Started
+          </button>
+          <button
+            onClick={() => setSelectedStatus("In Progress")}
+            className={`btn ${
+              selectedStatus === "In Progress" ? "btn-primary" : "btn-outline"
+            }`}
+          >
+            In Progress
+          </button>
+          <button
+            onClick={() => setSelectedStatus("Completed")}
+            className={`btn ${
+              selectedStatus === "Completed" ? "btn-primary" : "btn-outline"
+            }`}
+          >
+            Completed
+          </button>
+        </div>
+
+        {/* Sorting Buttons */}
+        <div className="mb-4 flex space-x-2">
+          <button
+            onClick={() => handleSort("due_date", "asc")}
+            className="btn btn-outline"
+          >
+            Sort by Due Date (Asc)
+          </button>
+          <button
+            onClick={() => handleSort("due_date", "desc")}
+            className="btn btn-outline"
+          >
+            Sort by Due Date (Desc)
+          </button>
+          <button
+            onClick={() => handleSort("priority_level", "asc")}
+            className="btn btn-outline"
+          >
+            Sort by Priority (Asc)
+          </button>
+          <button
+            onClick={() => handleSort("priority_level", "desc")}
+            className="btn btn-outline"
+          >
+            Sort by Priority (Desc)
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <div key={task._id} className="mb-4">
               <div className="bg-white rounded-lg p-4 shadow-md">
                 <h2 className="text-xl font-semibold text-gray-800">
@@ -117,6 +247,10 @@ const Dashboard = () => {
                 </h2>
                 <p className="text-sm mt-2 text-gray-500">
                   Due Date: {formatDate(task.due_date.split("T")[0])}
+                </p>
+                <p className="my-2 font-bold">Assigned To: {task.assignedTo}</p>
+                <p className="my-2 font-bold">
+                  Priority: {task.priority_level}
                 </p>
                 <div className="flex items-center mt-4">
                   <p className="text-lg text-gray-500">

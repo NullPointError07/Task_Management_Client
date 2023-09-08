@@ -6,23 +6,32 @@ import Swal from "sweetalert2";
 const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
+  const [bio, setBio] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5000/auth/register", {
+      const userData = {
         username,
         password,
-      });
+        profilePicture,
+        bio,
+      };
+
+      const res = await axios.post(
+        "https://task-manager-server-amber-six.vercel.app/auth/register",
+        userData
+      );
 
       if (res.data && res.data.message) {
         Swal.fire("User registered successfully! Now Login").then(() => {
           navigate("/login");
         });
       } else {
-        alert("Registration Complete! Now LogIn");
+        alert("Registration Complete! Now Log In");
       }
     } catch (err) {
       console.error(err);
@@ -70,6 +79,39 @@ const SignUp = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="input input-bordered w-full mb-2"
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="profilePicture"
+              className="block text-gray-600 font-semibold mb-2 pl-2"
+            >
+              Profile Picture:
+            </label>
+            <input
+              type="text"
+              name="profilePicture"
+              id="profilePicture"
+              placeholder="Enter URL to Profile Picture"
+              value={profilePicture}
+              onChange={(e) => setProfilePicture(e.target.value)}
+              className="input input-bordered w-full mb-2"
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="bio"
+              className="block text-gray-600 font-semibold mb-2 pl-2"
+            >
+              Bio:
+            </label>
+            <textarea
+              name="bio"
+              id="bio"
+              placeholder="Enter Your Bio"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
               className="input input-bordered w-full mb-2"
             />
           </div>

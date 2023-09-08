@@ -14,10 +14,13 @@ const Login = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/auth/login", {
-        username,
-        password,
-      });
+      const response = await axios.get(
+        "https://task-manager-server-amber-six.vercel.app/auth/login",
+        {
+          username,
+          password,
+        }
+      );
       setCookies("access_token", response.data.token);
       window.localStorage.setItem("userID", response.data.userID);
       window.localStorage.setItem("username", username);
